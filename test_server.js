@@ -23,7 +23,10 @@ async function fixture(t) {
     fs.copyFileSync(path.join(__dirname, file), path.join(siteRoot, file));
   }
   fs.cpSync(path.join(__dirname, 'js'), path.join(siteRoot, 'js'), { recursive: true });
-  const app = createApp({ root: siteRoot, databasePath: path.join(directory, 'test.sqlite3') });
+  const app = createApp({
+    root: siteRoot, databasePath: path.join(directory, 'test.sqlite3'),
+    uploadDir: path.join(directory, 'volume', 'uploads')
+  });
   const http = app.listen(0, '127.0.0.1');
   await new Promise((resolve) => http.once('listening', resolve));
   const baseUrl = `http://127.0.0.1:${http.address().port}`;
@@ -32,7 +35,7 @@ async function fixture(t) {
     app.locals.fitmetricDb.close();
     fs.rmSync(directory, { recursive: true, force: true });
   });
-  return { app, baseUrl };
+  return { app, baseUrl, directory, siteRoot };
 }
 
 function client() {
@@ -205,6 +208,31 @@ test('authenticates an existing admin hash and publishes website drafts', async 
   await admin.request(baseUrl, '/api/admin/summary', { expected: 401 });
 });
 
+test('marks member and admin session cookies Secure behind HTTPS', async (t) => {
+  const { app, baseUrl } = await fixture(t);
+  const db = app.locals.fitmetricDb;
+  const password = 'secure-pass-123';
+  await fetch(baseUrl + '/api/auth/register', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: 'Member', email: 'secure@example.com', password, confirmPassword: password, role: 'member' })
+  });
+  const memberLogin = await fetch(baseUrl + '/api/auth/login', {
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Forwarded-Proto': 'https, http' },
+    body: JSON.stringify({ email: 'secure@example.com', password })
+  });
+  assert.match(memberLogin.headers.get('set-cookie'), /;\s*Secure(?:;|$)/);
+  await memberLogin.body.cancel();
+
+  db.prepare('INSERT INTO admin_users (id, name, email, password_hash, created_at) VALUES (?, ?, ?, ?, ?)')
+    .run('https-admin', 'HTTPS Admin', 'https-admin@example.com', hashPassword(password), new Date().toISOString());
+  const adminLogin = await fetch(baseUrl + '/api/admin/login', {
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Forwarded-Proto': 'https' },
+    body: JSON.stringify({ email: 'https-admin@example.com', password })
+  });
+  assert.match(adminLogin.headers.get('set-cookie'), /;\s*Secure(?:;|$)/);
+  await adminLogin.body.cancel();
+});
+
 test('creates the first administrator only in the existing account database', async (t) => {
   const { app } = await fixture(t);
   const db = app.locals.fitmetricDb;
@@ -220,8 +248,14 @@ test('creates the first administrator only in the existing account database', as
 });
 
 test('validates library images, serves uploads, and prevents deleting published assets', async (t) => {
-  const { app, baseUrl } = await fixture(t);
+  const { app, baseUrl, directory, siteRoot } = await fixture(t);
   const db = app.locals.fitmetricDb;
+  fs.mkdirSync(path.join(siteRoot, 'uploads'));
+  fs.writeFileSync(path.join(siteRoot, 'uploads', 'legacy-image.png'), Buffer.from('legacy image'));
+  const legacyImage = await fetch(baseUrl + '/uploads/legacy-image.png');
+  assert.equal(legacyImage.status, 200);
+  assert.equal(await legacyImage.text(), 'legacy image');
+
   db.prepare('INSERT INTO admin_users (id, name, email, password_hash, created_at) VALUES (?, ?, ?, ?, ?)')
     .run('media-admin', 'Media Admin', 'media@example.com', hashPassword('admin-pass-12345'), new Date().toISOString());
   const admin = client();
@@ -238,6 +272,7 @@ test('validates library images, serves uploads, and prevents deleting published 
       data: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/pWQAAAAASUVORK5CYII='
     }
   })).image;
+  assert.equal(fs.existsSync(path.join(directory, 'volume', 'uploads', image.url.slice('/uploads/'.length))), true);
   const imageResponse = await fetch(baseUrl + image.url);
   assert.equal(imageResponse.status, 200);
   assert.equal(imageResponse.headers.get('content-type'), 'image/png');

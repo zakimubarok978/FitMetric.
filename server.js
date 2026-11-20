@@ -8,8 +8,9 @@ const Database = require('better-sqlite3');
 
 const ROOT = __dirname;
 const DATABASE = process.env.FITMETRIC_DB || path.join(ROOT, 'fitmetric.sqlite3');
-const HOST = process.env.FITMETRIC_HOST || '127.0.0.1';
-const PORT = Number.parseInt(process.env.FITMETRIC_PORT || '8000', 10);
+const RAILWAY = Boolean(process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_ENVIRONMENT_NAME);
+const HOST = process.env.FITMETRIC_HOST || (RAILWAY ? '0.0.0.0' : '127.0.0.1');
+const PORT = Number.parseInt(process.env.PORT || process.env.FITMETRIC_PORT || '8000', 10);
 const SESSION_DAYS = 30;
 const PASSWORD_ITERATIONS = 310000;
 const MAX_REQUEST_SIZE = 1000000;
@@ -263,7 +264,7 @@ function cookieValue(req, name) {
 }
 
 function secureCookie(req) {
-  return req.get('x-forwarded-proto')?.toLowerCase() === 'https' ? '; Secure' : '';
+  return req.get('x-forwarded-proto')?.split(',')[0].trim().toLowerCase() === 'https' ? '; Secure' : '';
 }
 
 function sessionUser(db, req) {
@@ -530,11 +531,11 @@ function getState(db, user) {
 
 function apiResult(status, body, headers = {}) { return { status, body, headers }; }
 function cookieToken() { return crypto.randomBytes(32).toString('base64url'); }
-function createSession(db, userId) {
+function createSession(db, userId, req) {
   const token = cookieToken();
   db.prepare('INSERT INTO sessions (token_hash, user_id, expires_at, created_at) VALUES (?, ?, ?, ?)')
     .run(tokenHash(token), userId, new Date(Date.now() + SESSION_DAYS * 86400000).toISOString(), now());
-  return `fitmetric_session=${token}; Path=/; Max-Age=${SESSION_DAYS * 86400}; HttpOnly; SameSite=Lax`;
+  return `fitmetric_session=${token}; Path=/; Max-Age=${SESSION_DAYS * 86400}; HttpOnly; SameSite=Lax${secureCookie(req)}`;
 }
 
 function register(db, req) {
@@ -567,7 +568,7 @@ function login(db, req) {
   const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
   if (!user) throw new ApiError(401, 'No account is registered with this email.');
   if (!verifyPassword(password, user.password_hash)) throw new ApiError(401, 'Incorrect password.');
-  return apiResult(200, { user: publicUser(user) }, { 'Set-Cookie': createSession(db, user.id) });
+  return apiResult(200, { user: publicUser(user) }, { 'Set-Cookie': createSession(db, user.id, req) });
 }
 
 function adminLogin(db, req) {
@@ -598,7 +599,7 @@ function adminLogout(db, req) {
 function logout(db, req) {
   const token = cookieValue(req, 'fitmetric_session');
   if (token) db.prepare('DELETE FROM sessions WHERE token_hash = ?').run(tokenHash(token));
-  return apiResult(200, { ok: true }, { 'Set-Cookie': 'fitmetric_session=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax' });
+  return apiResult(200, { ok: true }, { 'Set-Cookie': `fitmetric_session=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax${secureCookie(req)}` });
 }
 
 function updateProfile(db, user, body) {
@@ -908,7 +909,7 @@ function changeCollection(db, user, collection, recordId, body, method) {
   return save(db, user, recordId, body, method);
 }
 
-function uploadAdminImage(db, root, admin, body) {
+function uploadAdminImage(db, uploadDir, admin, body) {
   const originalName = textValue(body, 'filename', { required: true, limit: 180 });
   const encoded = body.data;
   if (typeof encoded !== 'string' || encoded.length > Math.ceil(MAX_IMAGE_SIZE / 3) * 4 + 8) throw new ApiError(413, 'Image must be 3 MB or smaller.');
@@ -925,7 +926,6 @@ function uploadAdminImage(db, root, admin, body) {
   if (!validSignature) throw new ApiError(400, 'The file content does not match its image format.');
   const id = newId();
   const filename = id + savedExtension;
-  const uploadDir = path.resolve(root, 'uploads');
   fs.mkdirSync(uploadDir, { recursive: true });
   const filePath = path.resolve(uploadDir, filename);
   if (!filePath.startsWith(uploadDir + path.sep)) throw new ApiError(400, 'Invalid image path.');
@@ -941,17 +941,20 @@ function uploadAdminImage(db, root, admin, body) {
   return apiResult(201, { image: { id, url: `/uploads/${filename}`, name: originalName } });
 }
 
-function deleteAdminImage(db, root, admin, imageId) {
+function deleteAdminImage(db, uploadDir, legacyUploadDir, admin, imageId) {
   const image = db.prepare('SELECT * FROM website_images WHERE id = ?').get(imageId);
   if (!image) throw new ApiError(404, 'Image not found.');
   const url = `/uploads/${image.filename}`;
   if (JSON.stringify(publishedSite(db)).includes(url) || JSON.stringify(draftSite(db)).includes(url)) {
     throw new ApiError(409, 'This image is in use. Replace it in the website draft before deleting it.');
   }
-  const uploadDir = path.resolve(root, 'uploads');
   const filePath = path.resolve(uploadDir, image.filename);
   if (!filePath.startsWith(uploadDir + path.sep)) throw new ApiError(400, 'Invalid image path.');
   if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  const legacyFilePath = path.resolve(legacyUploadDir, image.filename);
+  if (legacyUploadDir !== uploadDir && legacyFilePath.startsWith(legacyUploadDir + path.sep) && fs.existsSync(legacyFilePath)) {
+    fs.unlinkSync(legacyFilePath);
+  }
   db.prepare('DELETE FROM website_images WHERE id = ?').run(imageId);
   logAdminActivity(db, admin, 'image_deleted', image.original_name);
   return apiResult(200, { ok: true });
@@ -960,6 +963,11 @@ function deleteAdminImage(db, root, admin, imageId) {
 function createApp(options = {}) {
   const root = path.resolve(options.root || ROOT);
   const database = options.databasePath || DATABASE;
+  const uploadDir = path.resolve(options.uploadDir || process.env.FITMETRIC_UPLOADS || path.join(path.dirname(path.resolve(database)), 'uploads'));
+  const legacyUploadDir = path.resolve(root, 'uploads');
+  if (!options.databasePath && process.env.FITMETRIC_DB && !fs.existsSync(database)) {
+    throw new Error(`FITMETRIC_DB does not exist: ${database}. Attach the volume containing the existing FitMetric database.`);
+  }
   const db = options.db || openDatabase(database);
   initializeDatabase(db);
   const app = express();
@@ -1086,8 +1094,8 @@ function createApp(options = {}) {
     logAdminActivity(db, admin, 'draft_discarded');
     return apiResult(200, { ok: true });
   }));
-  app.post('/api/admin/images', write((req) => uploadAdminImage(db, root, requireAdmin(db, req), req.body)));
-  app.delete('/api/admin/images/:imageId', write((req) => deleteAdminImage(db, root, requireAdmin(db, req), req.params.imageId)));
+  app.post('/api/admin/images', write((req) => uploadAdminImage(db, uploadDir, requireAdmin(db, req), req.body)));
+  app.delete('/api/admin/images/:imageId', write((req) => deleteAdminImage(db, uploadDir, legacyUploadDir, requireAdmin(db, req), req.params.imageId)));
 
   app.patch('/api/profile', write((req) => updateProfile(db, currentUser(db, req), req.body)));
   app.post('/api/invitations', write((req) => createInvitation(db, currentUser(db, req), req.body)));
@@ -1129,12 +1137,28 @@ function createApp(options = {}) {
         res.set('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self'; frame-ancestors 'self'; base-uri 'self';");
       }
       const requestedPath = req.path === '/' ? 'index.html' : decodeURIComponent(req.path).replace(/^\/+/, '');
-      let target = path.resolve(root, requestedPath);
-      if (target !== root && !target.startsWith(root + path.sep)) throw new ApiError(404, 'File not found.');
-      target = fs.realpathSync(target);
-      if (target !== root && !target.startsWith(root + path.sep)) throw new ApiError(404, 'File not found.');
-      const relativePath = path.relative(root, target);
+      const relativePath = requestedPath.replace(/\//g, path.sep);
       const firstPart = relativePath.split(path.sep)[0].toLowerCase();
+      let target;
+      if (firstPart === 'uploads') {
+        const uploadPath = path.resolve(uploadDir, relativePath.slice('uploads'.length + 1));
+        if (!uploadPath.startsWith(uploadDir + path.sep)) throw new ApiError(404, 'File not found.');
+        try {
+          target = fs.realpathSync(uploadPath);
+        } catch (error) {
+          if (error.code !== 'ENOENT' || legacyUploadDir === uploadDir) throw error;
+          target = fs.realpathSync(path.resolve(legacyUploadDir, relativePath.slice('uploads'.length + 1)));
+        }
+        if (!target.startsWith(uploadDir + path.sep) &&
+            !(legacyUploadDir !== uploadDir && target.startsWith(legacyUploadDir + path.sep))) {
+          throw new ApiError(404, 'File not found.');
+        }
+      } else {
+        target = path.resolve(root, requestedPath);
+        if (target !== root && !target.startsWith(root + path.sep)) throw new ApiError(404, 'File not found.');
+        target = fs.realpathSync(target);
+        if (target !== root && !target.startsWith(root + path.sep)) throw new ApiError(404, 'File not found.');
+      }
       const allowedRootFiles = new Set(['index.html', 'auth.html', 'admin.html', 'dashboard.html', 'admin.js', 'cms.js', 'script.js', 'styles.css', 'admin.css']);
       if (firstPart === 'js') {
         if (!relativePath.startsWith(`js${path.sep}`)) throw new ApiError(404, 'File not found.');
