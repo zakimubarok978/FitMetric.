@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title data-i18n="FitMetric | Track Your Progress, Transform Your Body">FitMetric | Track Your Progress, Transform Your Body</title>
+    <meta name="description" content="FitMetric helps you track workouts, monitor progress, and stay consistent with personal training goals." data-i18n-content="FitMetric helps you track workouts, monitor progress, and stay consistent with personal training goals." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/translations.js"></script>
+    <script src="js/i18n.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container navbar">
+        <a href="index.html" class="brand" aria-label="FitMetric home" data-i18n-aria-label="FitMetric home">
+          <span class="brand-mark">
+            <i data-lucide="dumbbell"></i>
+          </span>
+          <span>FitMetric</span>
+        </a>
+
+        <nav class="nav-links" aria-label="Main navigation" data-i18n-aria-label="Main navigation">
+          <a href="#home" data-cms-key="navHome">Home</a>
+          <a href="#features" data-cms-key="navFeatures">Features</a>
+          <a href="#programs" data-cms-key="navPrograms">Programs</a>
+          <a href="#trainers" data-cms-key="navTrainers">Trainers</a>
+          <a href="#about" data-cms-key="navAbout">About</a>
+        </nav>
+
+        <div class="nav-actions">
+          <div class="language-switcher">
+            <button type="button" class="language-trigger" aria-expanded="false" aria-label="Change language" data-i18n-aria-label="Change language">
+              <i data-lucide="globe-2"></i><span data-language-label>Bahasa: Indonesia</span><i data-lucide="chevron-down"></i>
+            </button>
+            <div class="language-menu">
+              <button type="button" data-language-option="id">🇮🇩 Bahasa Indonesia</button>
+              <button type="button" data-language-option="en">🇬🇧 English</button>
+            </div>
+          </div>
+          <a href="auth.html" class="btn btn-secondary" data-cms-key="navLogin">Login</a>
+          <a href="auth.html?mode=register" class="btn btn-primary" data-cms-key="navRegister">Get Started</a>
+        </div>
+        <button class="nav-toggle" type="button" aria-label="Toggle menu" data-i18n-aria-label="Toggle menu">
+          <i data-lucide="menu"></i>
+        </button>
+      </div>
+    </header>
+
+    <main id="home">
+      <section class="hero" data-cms-section="home">
+        <div class="container hero-grid">
+          <div class="hero-copy">
+            <h1 data-cms-key="heroTitle">BUILD STRENGTH. TRACK PROGRESS. BECOME BETTER.</h1>
+            <p data-cms-key="heroDescription">
+              Your personal fitness companion to track workouts, monitor progress, and achieve your fitness goals.
+            </p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="auth.html?mode=register" data-cms-key="heroButton">Get Started</a>
+              <a class="btn btn-secondary" href="#features" data-i18n="Explore Features" data-cms-key="heroSecondaryButton">Explore Features</a>
+            </div>
+            <div class="hero-metrics" aria-label="Quick statistics" data-i18n-aria-label="Quick statistics">
+              <div class="metric-pill">
+                <span data-i18n="Members">Members</span>
+                <strong data-cms-key="statMembers">12.4K</strong>
+              </div>
+              <div class="metric-pill">
+                <span data-i18n="Avg. Progress">Avg. Progress</span>
+                <strong data-cms-key="statProgress">+27%</strong>
+              </div>
+              <div class="metric-pill">
+                <span data-i18n="Coach Rating">Coach Rating</span>
+                <strong data-cms-key="statRating">4.9/5</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-visual" aria-label="Fitness dashboard preview" data-i18n-aria-label="Fitness dashboard preview" data-cms-image="hero">
+            <div class="visual-card">
+              <div class="visual-graphic">
+                <div class="floating-panel panel-a">
+                  <div class="panel-top">
+                    <span data-i18n="Weekly goal">Weekly goal</span>
+                    <span class="pill done" data-i18n="On track">On track</span>
+                  </div>
+                  <div class="panel-value">84%</div>
+                  <div class="panel-change" data-i18n="+12% this week">+12% this week</div>
+                </div>
+
+                <div class="floating-panel panel-b">
+                  <div class="panel-top">
+                    <span data-i18n="Calories">Calories</span>
+                    <span data-i18n="Burned">Burned</span>
+                  </div>
+                  <div class="panel-value">4,280</div>
+                  <div class="panel-change" data-i18n="Strong consistency">Strong consistency</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="features" class="featured-section" data-cms-section="features">
+        <div class="container">
+          <div class="section-header">
+            <span class="eyebrow" data-cms-key="featuresEyebrow">Features</span>
+            <h2 data-cms-key="featuresTitle">Everything you need to stay consistent</h2>
+            <p data-cms-key="featuresDescription">From tracking daily workouts to planning progress, FitMetric keeps your fitness routine focused and measurable.</p>
+          </div>
+
+          <div class="feature-grid" data-cms-list="features">
+            <article class="feature-card">
+              <div class="icon-wrap"><i data-lucide="activity"></i></div>
+              <h3 data-i18n="Workout Tracker">Workout Tracker</h3>
+              <p data-i18n="Log sets, reps, weights, and workout duration in just a few taps.">Log sets, reps, weights, and workout duration in just a few taps.</p>
+            </article>
+
+            <article class="feature-card">
+              <div class="icon-wrap"><i data-lucide="bar-chart-3"></i></div>
+              <h3 data-i18n="Progress Analytics">Progress Analytics</h3>
+              <p data-i18n="Analyze trends in weight, volume, frequency, and workout duration.">Analyze trends in weight, volume, frequency, and workout duration.</p>
+            </article>
+
+            <article class="feature-card">
+              <div class="icon-wrap"><i data-lucide="users"></i></div>
+              <h3 data-i18n="Personal Trainer">Personal Trainer</h3>
+              <p data-i18n="Follow customized programs and stay in sync with your coach.">Follow customized programs and stay in sync with your coach.</p>
+            </article>
+
+            <article class="feature-card">
+              <div class="icon-wrap"><i data-lucide="calendar-days"></i></div>
+              <h3 data-i18n="Workout Schedule">Workout Schedule</h3>
+              <p data-i18n="Plan weekly sessions and never miss your most important training blocks.">Plan weekly sessions and never miss your most important training blocks.</p>
+            </article>
+
+            <article class="feature-card">
+              <div class="icon-wrap"><i data-lucide="ruler"></i></div>
+              <h3 data-i18n="Body Measurement Tracker">Body Measurement Tracker</h3>
+              <p data-i18n="Monitor your progress with precise body measurements and goal milestones.">Monitor your progress with precise body measurements and goal milestones.</p>
+            </article>
+
+            <article class="feature-card">
+              <div class="icon-wrap"><i data-lucide="target"></i></div>
+              <h3 data-i18n="Fitness Goals">Fitness Goals</h3>
+              <p data-i18n="Set measurable targets and stay motivated through visible progress.">Set measurable targets and stay motivated through visible progress.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="programs" class="programs-section" data-cms-section="programs">
+        <div class="container">
+          <div class="section-header">
+            <span class="eyebrow" data-cms-key="programsEyebrow">Programs</span>
+            <h2 data-cms-key="programsTitle">Training plans designed for results</h2>
+          </div>
+
+          <div class="program-grid" data-cms-list="programs">
+            <article class="program-card">
+              <div class="program-visual" style="background-image: url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=900&q=80');"></div>
+              <div class="program-content">
+                <div class="program-price" data-i18n="Strength Builder">Strength Builder</div>
+                <h3 data-i18n="Build muscle and increase power">Build muscle and increase power</h3>
+                <p data-i18n="Structured 8-week progression using compound lifts, intensity tracking, and weekly performance reviews.">Structured 8-week progression using compound lifts, intensity tracking, and weekly performance reviews.</p>
+              </div>
+            </article>
+
+            <article class="program-card">
+              <div class="program-visual" style="background-image: url('https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=900&q=80');"></div>
+              <div class="program-content">
+                <div class="program-price" data-i18n="Fat Burn">Fat Burn</div>
+                <h3 data-i18n="Lose weight and gain endurance">Lose weight and gain endurance</h3>
+                <p data-i18n="A balanced program with cardio intervals, calorie awareness, and sustainable recovery cycles.">A balanced program with cardio intervals, calorie awareness, and sustainable recovery cycles.</p>
+              </div>
+            </article>
+
+            <article class="program-card">
+              <div class="program-visual" style="background-image: url('https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?auto=format&fit=crop&w=900&q=80');"></div>
+              <div class="program-content">
+                <div class="program-price" data-i18n="Athletic Performance">Athletic Performance</div>
+                <h3 data-i18n="Move faster and train smarter">Move faster and train smarter</h3>
+                <p data-i18n="Performance-focused routine for agility, power, and durable conditioning with measurable benchmarks.">Performance-focused routine for agility, power, and durable conditioning with measurable benchmarks.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="trainers" class="trainers-section" data-cms-section="trainers">
+        <div class="container">
+          <div class="section-header">
+            <span class="eyebrow" data-cms-key="trainersEyebrow">Coaches</span>
+            <h2 data-cms-key="trainersTitle">Meet your expert trainers</h2>
+          </div>
+
+          <div class="trainer-grid" data-cms-list="trainers">
+            <article class="trainer-card">
+              <img src="https://images.unsplash.com/photo-1541534401786-2077eed87a74?auto=format&fit=crop&w=800&q=80" alt="Trainer Sarah" data-i18n-alt="Trainer Sarah" />
+              <div class="trainer-content">
+                <div class="trainer-meta" data-i18n="Strength Coach">Strength Coach</div>
+                <h3>Sarah Williams</h3>
+                <p data-i18n="Helps members improve power, composition, and confidence for long-term strength gains.">Helps members improve power, composition, and confidence for long-term strength gains.</p>
+              </div>
+            </article>
+
+            <article class="trainer-card">
+              <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80" alt="Trainer Daniel" data-i18n-alt="Trainer Daniel" />
+              <div class="trainer-content">
+                <div class="trainer-meta" data-i18n="Conditioning Coach">Conditioning Coach</div>
+                <h3>Daniel Brooks</h3>
+                <p data-i18n="Builds functional endurance and keeps clients pushing through performative milestones.">Builds functional endurance and keeps clients pushing through performative milestones.</p>
+              </div>
+            </article>
+
+            <article class="trainer-card">
+              <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80" alt="Trainer Emma" data-i18n-alt="Trainer Emma" />
+              <div class="trainer-content">
+                <div class="trainer-meta" data-i18n="Rehab Specialist">Rehab Specialist</div>
+                <h3>Emma Davis</h3>
+                <p data-i18n="Creates safe, sustainable plans that bring mobility, resilience, and better movement patterns.">Creates safe, sustainable plans that bring mobility, resilience, and better movement patterns.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="about" class="about-section" data-cms-section="about">
+        <div class="container about-grid">
+          <div class="about-panel">
+            <div class="section-header" style="text-align:left; margin-bottom: 18px;">
+              <span class="eyebrow" data-cms-key="aboutEyebrow">About</span>
+              <h2 data-cms-key="aboutTitle">Built for sustainable fitness growth</h2>
+            </div>
+            <p style="color: var(--muted); line-height: 1.8;">
+              <span data-cms-key="aboutDescription">FitMetric combines daily tracking, structured training plans, and measurable accountability to help you make real progress—without the guessing.</span>
+            </p>
+            <ul class="feature-list">
+              <li><i data-lucide="check"></i> <span data-i18n="Smart tracking for training consistency" data-cms-key="aboutBullet1">Smart tracking for training consistency</span></li>
+              <li><i data-lucide="check"></i> <span data-i18n="Goal-based progress analytics" data-cms-key="aboutBullet2">Goal-based progress analytics</span></li>
+              <li><i data-lucide="check"></i> <span data-cms-key="aboutBullet3">Personalized programming with expert support</span></li>
+            </ul>
+          </div>
+
+          <div class="about-panel">
+            <img src="https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=900&q=80" alt="Fitness workout" data-i18n-alt="Fitness workout" style="width: 100%; height: 420px; object-fit: cover; border-radius: 18px;" />
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div class="footer-brand">
+          <span class="brand-mark" style="width: 34px; height: 34px;">
+            <i data-lucide="dumbbell"></i>
+          </span>
+          <div>
+            <strong>FitMetric</strong>
+            <p data-cms-key="footerTagline">Track Your Progress, Transform Your Body.</p>
+          </div>
+        </div>
+
+        <nav class="footer-nav" aria-label="Footer navigation" data-i18n-aria-label="Footer navigation">
+          <a href="#home" data-cms-key="footerHome">Home</a>
+          <a href="#features" data-cms-key="footerFeatures">Features</a>
+          <a href="#programs" data-cms-key="footerPrograms">Programs</a>
+          <a href="#trainers" data-cms-key="footerTrainers">Trainers</a>
+          <a href="auth.html" data-cms-key="footerLogin">Login</a>
+        </nav>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="cms.js"></script>
+    <script>
+      lucide.createIcons();
+    </script>
+  </body>
+</html>

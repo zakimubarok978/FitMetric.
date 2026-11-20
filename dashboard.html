@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title data-i18n="FitMetric | Dashboard">FitMetric | Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="js/translations.js"></script>
+    <script src="js/i18n.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container navbar">
+        <a href="dashboard.html" class="brand" aria-label="FitMetric dashboard home" data-i18n-aria-label="FitMetric dashboard home">
+          <span class="brand-mark"><i data-lucide="dumbbell"></i></span>
+          <span>FitMetric</span>
+        </a>
+
+        <div class="nav-actions">
+          <span id="currentUserBadge" class="pill done" style="padding: 10px 14px;">Member</span>
+          <div class="language-switcher">
+            <button type="button" class="language-trigger" aria-expanded="false" aria-label="Change language" data-i18n-aria-label="Change language">
+              <i data-lucide="globe-2"></i><span data-language-label>Bahasa: Indonesia</span><i data-lucide="chevron-down"></i>
+            </button>
+            <div class="language-menu">
+              <button type="button" data-language-option="id">🇮🇩 Bahasa Indonesia</button>
+              <button type="button" data-language-option="en">🇬🇧 English</button>
+            </div>
+          </div>
+          <button id="logoutBtn" class="btn btn-secondary" type="button" data-i18n="Logout">Logout</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="dashboard-shell">
+      <div class="container dashboard-layout">
+        <aside class="sidebar" aria-label="Sidebar navigation" data-i18n-aria-label="Sidebar navigation">
+          <div class="sidebar-head">
+            <strong data-i18n="Dashboard">Dashboard</strong>
+            <span id="sidebarRole" class="chip">Member</span>
+          </div>
+
+          <nav class="sidebar-nav" aria-label="Dashboard menu" data-i18n-aria-label="Dashboard menu">
+            <button class="nav-item active" data-section="overview" data-role="member trainer" type="button"><i data-lucide="layout-dashboard"></i> <span data-i18n="Dashboard">Dashboard</span></button>
+            <button class="nav-item" data-section="workouts" data-role="member" type="button"><i data-lucide="dumbbell"></i> <span data-i18n="My Workouts">My Workouts</span></button>
+            <button class="nav-item" data-section="workouts" data-role="trainer" type="button"><i data-lucide="dumbbell"></i> <span data-i18n="Training">Training</span></button>
+            <button class="nav-item" data-section="schedule" data-role="trainer" type="button"><i data-lucide="calendar-days"></i> <span data-i18n="Workout Schedule">Workout Schedule</span></button>
+            <button class="nav-item" data-section="progress" data-role="member trainer" type="button"><i data-lucide="trending-up"></i> <span data-i18n="Progress Tracker">Progress Tracker</span></button>
+            <button class="nav-item" data-section="body" data-role="member trainer" type="button"><i data-lucide="ruler"></i> <span data-i18n="Body Measurements">Body Measurements</span></button>
+            <button class="nav-item" data-section="trainer" data-role="member" type="button"><i data-lucide="message-square-text"></i> <span data-i18n="Trainer Notes">Trainer Notes</span></button>
+            <button class="nav-item" data-section="goals" data-role="member" type="button"><i data-lucide="target"></i> <span data-i18n="My Goals">My Goals</span></button>
+            <button class="nav-item" data-section="goals" data-role="trainer" type="button"><i data-lucide="target"></i> <span data-i18n="Client Goals">Client Goals</span></button>
+            <button class="nav-item" data-section="clients" data-role="trainer" type="button"><i data-lucide="users"></i> <span data-i18n="Clients">Clients</span></button>
+            <button class="nav-item" data-section="profile" data-role="member trainer" type="button"><i data-lucide="user-round"></i> <span data-i18n="Profile">Profile</span></button>
+          </nav>
+
+          <div class="sidebar-footer">
+            <div class="form-field hidden" id="trainerClientPicker">
+              <label for="activeClientSelect" data-i18n="Selected Client">Selected Client</label>
+              <select id="activeClientSelect"></select>
+            </div>
+            <button class="btn btn-primary" type="button" style="width: 100%; margin-top: 12px;" id="quickWorkoutBtn" data-role="member" data-i18n="Quick Workout Log">Quick Workout Log</button>
+            <button class="btn btn-primary hidden" type="button" style="width: 100%; margin-top: 12px;" id="quickClientBtn" data-role="trainer" data-i18n="+ Add Client">+ Add Client</button>
+          </div>
+        </aside>
+
+        <div class="content-panel">
+          <section id="overviewSection" class="dashboard-section">
+            <div class="welcome-card">
+              <div>
+                <h2 data-i18n="Welcome Back! Ready to Crush Your Goals?">Welcome Back! Ready to Crush Your Goals?</h2>
+                <p id="welcomeSubtitle" data-i18n="Keep your momentum high and hit your next milestone.">Keep your momentum high and hit your next milestone.</p>
+              </div>
+              <button class="btn btn-primary" type="button" id="addWorkoutButton" data-i18n="+ Add Workout">+ Add Workout</button>
+            </div>
+
+            <div class="summary-grid" id="summaryGrid"></div>
+            <div class="card notifications-card">
+              <div class="card-header">
+                <h3 data-i18n="Notifications">Notifications</h3>
+                <span class="chip" id="notificationCount">0</span>
+              </div>
+              <div id="notificationsList" class="history-list"></div>
+            </div>
+            <div class="card selected-client-overview" id="selectedClientOverview" data-role="trainer">
+              <div class="card-header">
+                <h3 data-i18n="Selected Client">Selected Client</h3>
+                <button class="btn btn-secondary" type="button" data-action="edit-selected-client" data-i18n="+ Add Trainer Note">+ Add Trainer Note</button>
+              </div>
+              <div id="selectedClientDetails"></div>
+            </div>
+
+            <div class="content-grid">
+              <div class="card">
+                <div class="card-header">
+                  <h3 data-i18n="Weekly Activity">Weekly Activity</h3>
+                  <span class="chip" data-i18n="Last 7 days">Last 7 days</span>
+                </div>
+                <div class="chart-wrap">
+                  <canvas id="weeklyChart"></canvas>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <h3 data-i18n="Today's Workout">Today's Workout</h3>
+                  <span class="chip" id="todayStatus" data-i18n="Ready">Ready</span>
+                </div>
+                <div id="todayWorkoutList" class="activity-list"></div>
+              </div>
+            </div>
+
+            <div class="content-grid">
+              <div class="card">
+                <div class="card-header">
+                  <h3 data-i18n="Upcoming Workout">Upcoming Workout</h3>
+                  <span class="chip" data-i18n="Schedule">Schedule</span>
+                </div>
+                <div id="upcomingWorkoutList" class="activity-list"></div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <h3 data-i18n="Recent Activities">Recent Activities</h3>
+                  <span class="chip" data-i18n="Live">Live</span>
+                </div>
+                <div id="recentActivitiesList" class="activity-list"></div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top: 24px;">
+              <div class="card-header">
+                <h3 data-i18n="Weekly Workout Statistics">Weekly Workout Statistics</h3>
+                <span class="chip" data-i18n="This week">This week</span>
+              </div>
+              <div class="mini-stats" id="weeklyStatsList"></div>
+            </div>
+          </section>
+
+          <section id="workoutsSection" class="dashboard-section hidden">
+            <div class="card" style="margin-bottom: 24px;">
+              <div class="card-header">
+                <h3 data-i18n="Workout Tracker">Workout Tracker</h3>
+                <span class="chip" data-i18n="Log session">Log session</span>
+              </div>
+
+              <form id="workoutForm" class="form-grid">
+                <input type="hidden" id="workoutId" />
+                <div class="inline-row">
+                  <div class="form-field">
+                    <label for="exerciseType" data-i18n="Exercise Type">Exercise Type</label>
+                    <select id="exerciseType">
+                      <option value="Chest" data-i18n="Chest">Chest</option>
+                      <option value="Back" data-i18n="Back">Back</option>
+                      <option value="Shoulder" data-i18n="Shoulder">Shoulder</option>
+                      <option value="Arms" data-i18n="Arms">Arms</option>
+                      <option value="Legs" data-i18n="Legs">Legs</option>
+                      <option value="Abs" data-i18n="Abs">Abs</option>
+                      <option value="Cardio" data-i18n="Cardio">Cardio</option>
+                      <option value="Full Body" data-i18n="Full Body">Full Body</option>
+                    </select>
+                  </div>
+                  <div class="form-field">
+                    <label for="exerciseName" data-i18n="Exercise">Exercise</label>
+                    <input id="exerciseName" type="text" value="Bench Press" placeholder="Exercise name" data-i18n-placeholder="Exercise name" required />
+                  </div>
+                </div>
+
+                <div class="inline-row">
+                  <div class="form-field">
+                    <label for="sets" data-i18n="Sets">Sets</label>
+                    <input id="sets" type="number" min="1" value="4" required />
+                  </div>
+                  <div class="form-field">
+                    <label for="reps" data-i18n="Reps">Reps</label>
+                    <input id="reps" type="number" min="1" value="12" required />
+                  </div>
+                  <div class="form-field">
+                    <label for="weight" data-i18n="Weight (kg)">Weight (kg)</label>
+                    <input id="weight" type="number" min="0" value="40" required />
+                  </div>
+                  <div class="form-field">
+                    <label for="duration" data-i18n="Duration (min)">Duration (min)</label>
+                    <input id="duration" type="number" min="1" value="30" required />
+                  </div>
+                </div>
+
+                <div class="form-field">
+                  <label for="workoutNotes" data-i18n="Notes">Notes</label>
+                  <textarea id="workoutNotes" rows="3" placeholder="Add notes about form, load, or progression" data-i18n-placeholder="Add notes about form, load, or progression"></textarea>
+                </div>
+
+                <div class="checkbox-row">
+                  <label>
+                    <input id="workoutCompleted" type="checkbox" checked />
+                    <span data-i18n="Mark as completed">Mark as completed</span>
+                  </label>
+                  <div class="submit-row" style="margin: 0;">
+                    <button type="submit" class="btn btn-primary" data-i18n="Save Workout">Save Workout</button>
+                    <button type="button" id="cancelWorkoutEdit" class="btn btn-secondary hidden" style="margin-left: 10px;" data-i18n="Cancel">Cancel</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 data-i18n="Workout History">Workout History</h3>
+                <span class="chip" id="historyCount">0 entries</span>
+              </div>
+              <div id="workoutHistoryList" class="history-list"></div>
+            </div>
+          </section>
+
+          <section id="scheduleSection" class="dashboard-section hidden">
+            <div class="card progress-chart-card" style="margin-bottom: 24px;">
+              <div class="card-header">
+                <h3 data-i18n="Add Workout Schedule">Add Workout Schedule</h3>
+                <span class="chip" data-i18n="Weekly plan">Weekly plan</span>
+              </div>
+
+              <form id="scheduleForm" class="form-grid">
+                <input type="hidden" id="scheduleId" />
+                <div class="inline-row">
+                  <div class="form-field">
+                    <label for="scheduleDay" data-i18n="Day">Day</label>
+                    <select id="scheduleDay">
+                      <option value="Monday" data-i18n="Monday">Monday</option>
+                      <option value="Tuesday" data-i18n="Tuesday">Tuesday</option>
+                      <option value="Wednesday" data-i18n="Wednesday">Wednesday</option>
+                      <option value="Thursday" data-i18n="Thursday">Thursday</option>
+                      <option value="Friday" data-i18n="Friday">Friday</option>
+                      <option value="Saturday" data-i18n="Saturday">Saturday</option>
+                      <option value="Sunday" data-i18n="Sunday">Sunday</option>
+                    </select>
+                  </div>
+                  <div class="form-field">
+                    <label for="scheduleProgram" data-i18n="Program">Program</label>
+                    <input id="scheduleProgram" type="text" value="Upper Body Strength" required />
+                  </div>
+                </div>
+
+                <div class="inline-row">
+                  <div class="form-field">
+                    <label for="scheduleDate" data-i18n="Date">Date</label>
+                    <input id="scheduleDate" type="date" required />
+                  </div>
+                  <div class="form-field">
+                    <label for="scheduleTime" data-i18n="Time">Time</label>
+                    <input id="scheduleTime" type="time" value="18:30" required />
+                  </div>
+                  <div class="form-field">
+                    <label for="scheduleStatus" data-i18n="Status">Status</label>
+                    <select id="scheduleStatus">
+                      <option value="upcoming" data-i18n="Upcoming">Upcoming</option>
+                      <option value="done" data-i18n="Done">Done</option>
+                      <option value="missed" data-i18n="Missed">Missed</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="submit-row">
+                  <button type="submit" class="btn btn-primary" data-i18n="Save Schedule">Save Schedule</button>
+                </div>
+              </form>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 data-i18n="Weekly Calendar">Weekly Calendar</h3>
+                <span class="chip" data-i18n="7-day view">7-day view</span>
+              </div>
+              <div class="form-field schedule-date-filter">
+                <label for="scheduleDateFilter" data-i18n="Filter by date">Filter by date</label>
+                <input id="scheduleDateFilter" type="date" />
+              </div>
+              <div id="scheduleList" class="schedule-list"></div>
+            </div>
+          </section>
+
+          <section id="progressSection" class="dashboard-section hidden">
+            <div class="card" style="margin-bottom: 24px;">
+              <div class="card-header">
+                <h3 data-i18n="Progress Analytics">Progress Analytics</h3>
+                <span class="chip" data-i18n="Real data">Real data</span>
+              </div>
+              <div class="chart-actions" id="progressFilters">
+                <button type="button" class="filter-btn active" data-range="7" data-i18n="7 Days">7 Days</button>
+                <button type="button" class="filter-btn" data-range="30" data-i18n="30 Days">30 Days</button>
+                <button type="button" class="filter-btn" data-range="90" data-i18n="3 Months">3 Months</button>
+                <button type="button" class="filter-btn" data-range="365" data-i18n="1 Year">1 Year</button>
+              </div>
+              <div class="progress-chart-wrap">
+                <canvas id="progressChart"></canvas>
+              </div>
+            </div>
+          </section>
+
+          <section id="bodySection" class="dashboard-section hidden">
+            <div class="card">
+              <div class="card-header">
+                <h3 data-i18n="Body Measurements">Body Measurements</h3>
+                <button class="btn btn-secondary" type="button" data-action="add-measurement" data-i18n="+ Add Measurement">+ Add Measurement</button>
+              </div>
+              <form id="measurementForm" class="form-grid">
+                <input type="hidden" id="measurementId" />
+                <div class="inline-row">
+                  <div class="form-field">
+                    <label for="bodyDate" data-i18n="Measurement Date">Measurement Date</label>
+                    <input id="bodyDate" type="date" required />
+                  </div>
+                  <div class="form-field">
+                    <label for="bodyWeight" data-i18n="Weight (kg)">Weight (kg)</label>
+                    <input id="bodyWeight" type="number" min="0.1" step="0.1" required />
+                  </div>
+                  <div class="form-field">
+                    <label for="bodyHeight" data-i18n="Height (cm)">Height (cm)</label>
+                    <input id="bodyHeight" type="number" min="1" step="0.1" />
+                  </div>
+                </div>
+                <div class="inline-row">
+                  <div class="form-field">
+                    <label for="bodyWaist" data-i18n="Waist (cm)">Waist (cm)</label>
+                    <input id="bodyWaist" type="number" min="0" step="0.1" />
+                  </div>
+                  <div class="form-field">
+                    <label for="bodyChest" data-i18n="Chest (cm)">Chest (cm)</label>
+                    <input id="bodyChest" type="number" min="0" step="0.1" />
+                  </div>
+                  <div class="form-field">
+                    <label for="bodyArm" data-i18n="Arm (cm)">Arm (cm)</label>
+                    <input id="bodyArm" type="number" min="0" step="0.1" />
+                  </div>
+                  <div class="form-field">
+                    <label for="bodyThigh" data-i18n="Thigh (cm)">Thigh (cm)</label>
+                    <input id="bodyThigh" type="number" min="0" step="0.1" />
+                  </div>
+                  <div class="form-field">
+                    <label for="bodyFat" data-i18n="Body Fat (%)">Body Fat (%)</label>
+                    <input id="bodyFat" type="number" min="0" max="100" step="0.1" />
+                  </div>
+                </div>
+                <div class="submit-row">
+                  <button type="submit" class="btn btn-primary" data-i18n="Save Measurement">Save Measurement</button>
+                  <button type="button" class="btn btn-secondary hidden" id="cancelMeasurementEdit" data-i18n="Cancel">Cancel</button>
+                </div>
+              </form>
+              <div id="measurementHistory" class="history-list"></div>
+            </div>
+          </section>
+
+          <section id="trainerSection" class="dashboard-section hidden">
+            <div class="card">
+              <div class="card-header">
+                <h3 data-i18n="Trainer Notes">Trainer Notes</h3>
+                <span class="chip" id="trainerBadge">Coach</span>
+                <button class="btn btn-secondary hidden" type="button" id="addTrainerNoteButton" data-action="add-note" data-i18n="+ Add Note">+ Add Note</button>
+              </div>
+              <p id="trainerInfo" style="color: var(--muted); line-height: 1.8;" data-i18n="Your coach is helping you maintain a strong and sustainable training rhythm.">Your coach is helping you maintain a strong and sustainable training rhythm.</p>
+              <div id="connectedTrainerInfo" class="relationship-card"></div>
+              <div class="card invitation-card" data-role="member">
+                <div class="card-header">
+                  <h3 data-i18n="Trainer invitations">Trainer invitations</h3>
+                </div>
+                <form id="redeemInvitationForm" class="inline-row">
+                  <div class="form-field">
+                    <label for="invitationCode" data-i18n="Invitation code">Invitation code</label>
+                    <input id="invitationCode" type="text" maxlength="20" autocomplete="off" />
+                  </div>
+                  <button class="btn btn-primary" type="submit" data-i18n="Redeem code">Redeem code</button>
+                </form>
+                <div id="memberInvitationsList" class="history-list"></div>
+              </div>
+              <div id="trainerNotesList" class="history-list"></div>
+            </div>
+          </section>
+
+          <section id="goalsSection" class="dashboard-section hidden">
+            <div class="card">
+              <div class="card-header">
+                <h3 data-i18n="My Goals">My Goals</h3>
+                <button class="btn btn-secondary" type="button" data-action="add-goal" data-i18n="+ Add Goal">+ Add Goal</button>
+              </div>
+              <div id="goalList" class="activity-list"></div>
+            </div>
+          </section>
+
+          <section id="clientsSection" class="dashboard-section hidden">
+            <div class="card">
+              <div class="card-header">
+                <h3 data-i18n="Client Management">Client Management</h3>
+                <button class="btn btn-primary" type="button" data-action="add-client" data-i18n="+ Add Client">+ Add Client</button>
+                <button class="btn btn-secondary" type="button" data-action="create-invite-code" data-i18n="Create Invite Code">Create Invite Code</button>
+              </div>
+              <button class="btn btn-secondary trainer-note-action" type="button" data-action="add-note" data-role="trainer" data-i18n="+ Add Trainer Note">+ Add Trainer Note</button>
+              <div class="inline-row client-filters">
+                <div class="form-field">
+                  <label for="clientSearch" data-i18n="Search clients">Search clients</label>
+                  <input id="clientSearch" type="search" data-i18n-placeholder="Search by name or email" placeholder="Search by name or email" />
+                </div>
+                <div class="form-field">
+                  <label for="clientStatusFilter" data-i18n="Status">Status</label>
+                  <select id="clientStatusFilter">
+                    <option value="all" data-i18n="All clients">All clients</option>
+                    <option value="pending" data-i18n="Pending">Pending</option>
+                    <option value="active" data-i18n="Active">Active</option>
+                    <option value="rejected" data-i18n="Rejected">Rejected</option>
+                  </select>
+                </div>
+              </div>
+              <div id="clientList" class="activity-list"></div>
+            </div>
+          </section>
+
+          <section id="profileSection" class="dashboard-section hidden">
+            <div class="card">
+              <div class="card-header">
+                <h3 data-i18n="Profile">Profile</h3>
+                <span class="chip" id="profileRole">Member</span>
+              </div>
+              <p id="profileName" style="color: var(--muted); font-size: 1.1rem; margin: 0; line-height: 2;">Name</p>
+              <p id="profileEmail" style="color: var(--muted); margin: 0; line-height: 1.8;">Email</p>
+              <p id="profilePhone" style="color: var(--muted); margin: 0; line-height: 1.8;"></p>
+              <button class="btn btn-secondary" type="button" data-action="edit-profile" style="margin-top: 16px;" data-i18n="Edit Profile">Edit Profile</button>
+            </div>
+          </section>
+
+          <section id="settingsSection" class="dashboard-section hidden">
+            <div class="card">
+              <div class="card-header">
+                <h3 data-i18n="Settings">Settings</h3>
+                <span class="chip" data-i18n="Preferences">Preferences</span>
+              </div>
+              <p style="color: var(--muted); line-height: 1.8;" data-i18n="You can customize fitness preferences, reminders, and trainer communication in future product iterations.">You can customize fitness preferences, reminders, and trainer communication in future product iterations.</p>
+              <div class="form-field language-settings">
+                <label for="settingsLanguage" data-i18n="Language">Language</label>
+                <select id="settingsLanguage" data-language-select aria-label="Language" data-i18n-aria-label="Language">
+                  <option value="id">🇮🇩 Bahasa Indonesia</option>
+                  <option value="en">🇬🇧 English</option>
+                </select>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <div id="dashboardToast" class="toast" aria-live="polite"></div>
+    <dialog id="dataDialog" class="data-dialog">
+      <form id="dataDialogForm" class="form-grid" novalidate>
+        <div class="card-header">
+          <h3 id="dataDialogTitle"></h3>
+          <button type="button" class="icon-btn" data-dialog-close aria-label="Close"><i data-lucide="x"></i></button>
+        </div>
+        <div id="dataDialogFields" class="form-grid"></div>
+        <div id="dataDialogError" class="auth-error" aria-live="polite"></div>
+        <div class="dialog-actions">
+          <button type="button" class="btn btn-secondary" data-dialog-close data-i18n="Cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" data-i18n="Save">Save</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="script.js"></script>
+    <script src="cms.js"></script>
+    <script>
+      lucide.createIcons();
+    </script>
+  </body>
+</html>

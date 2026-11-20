@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>FitMetric Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="admin.css" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+  </head>
+  <body>
+    <main id="loginScreen" class="login-screen">
+      <form id="adminLoginForm" class="login-card">
+        <a class="admin-brand" href="index.html"><span class="brand-icon"><i data-lucide="dumbbell"></i></span>FITMETRIC<span class="brand-admin">ADMIN</span></a>
+        <div class="login-kicker">SECURE WORKSPACE</div>
+        <h1>Selamat datang kembali</h1>
+        <p>Masuk dengan kredensial administrator Anda.</p>
+        <label for="adminEmail">Email administrator</label>
+        <input id="adminEmail" name="email" type="email" autocomplete="username" required />
+        <label for="adminPassword">Password</label>
+        <input id="adminPassword" name="password" type="password" autocomplete="current-password" required />
+        <div id="loginError" class="error-message" role="alert"></div>
+        <button class="button button-primary full-width" type="submit">Masuk ke Admin Panel <i data-lucide="arrow-right"></i></button>
+        <a class="back-link" href="index.html"><i data-lucide="arrow-left"></i> Kembali ke website</a>
+      </form>
+    </main>
+
+    <div id="adminApp" class="admin-app" hidden>
+      <aside class="sidebar">
+        <a class="admin-brand" href="admin.html"><span class="brand-icon"><i data-lucide="dumbbell"></i></span>FITMETRIC<span class="brand-admin">ADMIN</span></a>
+        <div class="sidebar-label">WORKSPACE</div>
+        <nav id="adminNav" class="admin-nav" aria-label="Navigasi admin">
+          <button data-view="overview"><i data-lucide="layout-dashboard"></i>Dashboard Admin</button>
+          <button data-view="home"><i data-lucide="panels-top-left"></i>Edit Beranda</button>
+          <button data-view="features"><i data-lucide="sparkles"></i>Edit Halaman Fitur</button>
+          <button data-view="programs"><i data-lucide="dumbbell"></i>Edit Program</button>
+          <button data-view="trainers"><i data-lucide="users-round"></i>Edit Pelatih</button>
+          <button data-view="about"><i data-lucide="info"></i>Edit Halaman Tentang</button>
+          <button data-view="images"><i data-lucide="images"></i>Manajemen Gambar</button>
+          <button data-view="theme"><i data-lucide="palette"></i>Warna dan Font</button>
+          <button data-view="accounts"><i data-lucide="contact-round"></i>Manajemen Akun</button>
+          <button data-view="settings"><i data-lucide="settings-2"></i>Pengaturan Website</button>
+          <button data-view="activity"><i data-lucide="history"></i>Riwayat Perubahan</button>
+        </nav>
+        <button id="logoutButton" class="logout-button"><i data-lucide="log-out"></i>Keluar</button>
+        <div class="sidebar-foot"><span class="status-dot"></span>SQLite · Data tersimpan</div>
+      </aside>
+
+      <main class="admin-main">
+        <header class="topbar">
+          <button id="mobileMenuButton" class="icon-button mobile-menu-button" aria-label="Buka navigasi"><i data-lucide="menu"></i></button>
+          <div class="breadcrumb"><span>FitMetric</span><i data-lucide="chevron-right"></i><strong id="currentPageLabel">Dashboard Admin</strong></div>
+          <div class="topbar-actions">
+            <span id="saveState" class="save-state"><span class="status-dot"></span>Semua perubahan tersimpan</span>
+            <button id="previewButton" class="button button-quiet" aria-label="Preview Website" title="Preview Website"><i data-lucide="eye"></i><span>Preview Website</span></button>
+            <button id="saveButton" class="button button-secondary" aria-label="Simpan Perubahan" title="Simpan Perubahan"><i data-lucide="save"></i><span>Simpan Perubahan</span></button>
+            <button id="discardButton" class="button button-danger" aria-label="Batalkan Perubahan" title="Batalkan Perubahan"><i data-lucide="undo-2"></i><span>Batalkan</span></button>
+            <button id="publishButton" class="button button-primary" aria-label="Publikasikan" title="Publikasikan"><i data-lucide="send"></i><span>Publikasikan</span></button>
+          </div>
+        </header>
+        <section id="workspace" class="workspace" aria-live="polite"></section>
+      </main>
+    </div>
+
+    <div id="previewModal" class="modal" hidden>
+      <div class="modal-backdrop" data-close-preview></div>
+      <section class="preview-dialog" role="dialog" aria-modal="true" aria-label="Preview website">
+        <header><div><strong>Preview website</strong><span>Hanya terlihat oleh admin sebelum dipublikasikan.</span></div><button class="icon-button" data-close-preview aria-label="Tutup preview"><i data-lucide="x"></i></button></header>
+        <iframe title="Pratinjau draft website" src="about:blank"></iframe>
+      </section>
+    </div>
+    <div id="adminToast" class="toast" role="status" aria-live="polite"></div>
+    <script src="admin.js"></script>
+  </body>
+</html>

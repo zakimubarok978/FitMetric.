@@ -1,0 +1,6 @@
+fitmetric.sqlite3
+fitmetric.sqlite3-shm
+fitmetric.sqlite3-wal
+.venv/
+uploads/
+node_modules/
